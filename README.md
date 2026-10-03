@@ -56,8 +56,8 @@ sudo pacman -S --needed $(grep -v '^#' wangan-yoru/packages.txt)
 > Everything it replaces is backed up first.
 
 ```sh
-git clone https://github.com/houssemMekhelbi/hattin-wangan.git
-cd hattin-wangan
+git clone https://github.com/houssemMekhelbi/wangan.git
+cd wangan
 ./wangan-yoru/restore.sh --dry-run   # show what would change, touch nothing
 ./wangan-yoru/restore.sh             # apply wangan-yoru
 ./wangan-asa/restore.sh              # or wangan-asa
