@@ -1,0 +1,45 @@
+# Wangan yoru terminal. Night at 90%, compositor blur behind it.
+
+font-family = M PLUS 1 Code
+font-family = JetBrainsMono Nerd Font
+font-size = 11
+adjust-cell-height = 30%
+window-padding-x = 16
+window-padding-y = 16
+window-decoration = none
+background-opacity = 0.90
+background-blur = true
+
+background = #0B0D11
+foreground = #C9D0DB
+cursor-color = #F2A33A
+cursor-text = #0B0D11
+cursor-style = block
+cursor-style-blink = false
+selection-background = #1A2029
+selection-foreground = #EEF1F5
+
+# Search and splits in the theme's colours (ghostty's stock yellow and orange otherwise).
+search-background = #5B8DEF
+search-foreground = #0B0D11
+search-selected-background = #F2A33A
+search-selected-foreground = #0B0D11
+split-divider-color = #2A323F
+unfocused-split-fill = #0B0D11
+
+palette = 0=#0B0D11
+palette = 1=#FF5A5E
+palette = 2=#7BD0A0
+palette = 3=#F2A33A
+palette = 4=#5B8DEF
+palette = 5=#A98BF0
+palette = 6=#5CC8D8
+palette = 7=#8C97A8
+palette = 8=#5F6A7C
+palette = 9=#FF8588
+palette = 10=#9BE0B8
+palette = 11=#F7C16E
+palette = 12=#8AAEF5
+palette = 13=#C3AEF7
+palette = 14=#8ADBE6
+palette = 15=#EEF1F5

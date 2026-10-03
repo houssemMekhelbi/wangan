@@ -1,0 +1,124 @@
+/* Wangan asa notifications: lozenge cards (radius 22) on the panel colour at 98%
+ * (a layer surface reads far more see-through than its alpha suggests), a
+ * hairline ring and the blue crescent along the lower edge. Urgency changes
+ * the crescent only: blue for normal, the hairline for low, the redline for
+ * critical. Starts from the stock stylesheet. Blur comes from the Hyprland
+ * layer rule wangan-notify-glass (^swaync). Reload after editing: swaync-client -rs */
+
+@import url("file:///etc/xdg/swaync/style.css");
+
+:root {
+  --cc-bg: rgba(228, 232, 238, 1.0);
+  --noti-border-color: rgb(183, 192, 205);
+  --noti-bg: 242, 244, 248;
+  --noti-bg-alpha: 0.98;
+  --noti-bg-darker: rgb(228, 232, 238);
+  --noti-bg-hover: rgb(213, 220, 231);
+  --noti-bg-focus: rgba(213, 220, 231, 0.8);
+  --noti-close-bg: rgb(213, 220, 231);
+  --noti-close-bg-hover: rgb(183, 192, 205);
+  --text-color: rgb(16, 21, 29);
+  --text-color-disabled: rgb(78, 89, 107);
+  --bg-selected: rgb(42, 95, 196);
+  --border: 1px solid var(--noti-border-color);
+  --border-radius: 22px;
+  --notification-shadow: 0 6px 18px rgba(16, 21, 29, 0.35);
+  --font-size-body: 13px;
+  --font-size-summary: 13px;
+}
+
+* {
+  font-family: "M PLUS 1p", "IBM Plex Sans Arabic", sans-serif;
+}
+
+.notification-row .notification-background .notification {
+  background-color: rgba(242, 244, 248, 0.98);
+  border: 1px solid rgb(183, 192, 205);
+  border-radius: 22px;
+  padding: 2px 6px;
+  box-shadow: inset 0 -2px 0 rgb(42, 95, 196);
+}
+
+.notification-row .notification-background .notification.low {
+  box-shadow: inset 0 -2px 0 rgb(169, 179, 194);
+}
+
+.notification-row .notification-background .notification.critical {
+  box-shadow: inset 0 -2px 0 rgb(212, 31, 39);
+}
+
+.notification-row .notification-background .notification .notification-default-action {
+  border-radius: 20px;
+}
+
+.notification-row .notification-background .notification .notification-default-action .notification-content .text-box .summary {
+  font-weight: 500;
+  color: rgb(16, 21, 29);
+}
+
+.notification-row .notification-background .notification .notification-default-action .notification-content .text-box .time {
+  font-family: "DotGothic16", "M PLUS 1 Code", monospace;
+  font-size: 12px;
+  font-weight: normal;
+  color: rgb(78, 89, 107);
+}
+
+.notification-row .notification-background .notification .notification-default-action .notification-content .text-box .body {
+  color: rgb(78, 89, 107);
+}
+
+.close-button {
+  border-radius: 12px;
+}
+
+.control-center {
+  border: 1px solid rgb(183, 192, 205);
+  border-radius: 22px;
+}
+
+.widget-title > label {
+  font-family: "Zen Dots", sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 1px;
+  color: rgb(16, 21, 29);
+}
+
+.widget-title > button,
+.widget-buttons-grid flowboxchild > button {
+  border-radius: 14px;
+  background: rgb(242, 244, 248);
+  color: rgb(16, 21, 29);
+  border: 1px solid rgb(183, 192, 205);
+}
+
+.widget-title > button:hover,
+.widget-buttons-grid flowboxchild > button:hover {
+  background: rgb(213, 220, 231);
+  border-color: rgb(31, 79, 168);
+}
+
+.widget-buttons-grid flowboxchild > button.toggle:checked {
+  background: rgb(42, 95, 196);
+  color: rgb(255, 255, 255);
+}
+
+.widget-dnd label {
+  font-family: "Zen Dots", sans-serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: rgb(143, 82, 0);
+}
+
+.widget-dnd switch {
+  border-radius: 14px;
+  background: rgb(183, 192, 205);
+}
+
+.widget-dnd switch slider {
+  border-radius: 14px;
+  background: rgb(242, 244, 248);
+}
+
+.widget-dnd switch:checked {
+  background: rgb(42, 95, 196);
+}

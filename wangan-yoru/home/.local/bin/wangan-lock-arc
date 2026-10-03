@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""The tachometer arc of the Wangan lock screen (Wangan yoru colours).
+
+hyprlock draws no arcs, so its `image` widget shows a PNG that this script
+re-renders (rsvg-convert): a 270 degree, 24 hour dial that fills in amber from
+00 up to the current time, a white needle on now, a red zone from 22 to 24, and
+the numerals 00 06 12 18 24 in Zen Dots. Both Wangan variants install this file
+with their own colours.
+
+    wangan-lock-arc              render for now if the minute changed, print the PNG's path
+                                 (hyprlock: reload_cmd; the path goes to stdout)
+    wangan-lock-arc --static F   the dial without sweep and needle, to F (build-art.py:
+                                 what the lock shows until the first reload)
+    wangan-lock-arc --at HH:MM F a given time, to F (previews)
+"""
+
+import math
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+LINE, MUTED, SILVER, TEXT = "#2A323F", "#8C97A8", "#C9D0DB", "#EEF1F5"
+SWEEP, RED, RED_T = "#F2A33A", "#D41F27", "#FF5A5E"
+S, R = 1000, 410                       # canvas, dial radius; the dial's centre is the canvas centre
+A0, A1 = 135, 405
+
+
+def pol(r, a):
+    return S / 2 + r * math.cos(math.radians(a)), S / 2 + r * math.sin(math.radians(a))
+
+
+def arc(r, a0, a1):
+    (x0, y0), (x1, y1) = pol(r, a0), pol(r, a1)
+    return f"M{x0:.2f},{y0:.2f} A{r},{r} 0 {1 if a1 - a0 > 180 else 0},1 {x1:.2f},{y1:.2f}"
+
+
+def ang(hours):
+    return A0 + (A1 - A0) * hours / 24
+
+
+def svg(now=None):
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{S}" height="{S}" viewBox="0 0 {S} {S}">',
+           '<defs><filter id="g" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="9"/></filter></defs>',
+           f'<path d="{arc(R, A0, A1)}" fill="none" stroke="{LINE}" stroke-width="4" stroke-linecap="round"/>',
+           f'<path d="{arc(R, ang(22), A1)}" fill="none" stroke="{RED}" stroke-width="8" stroke-linecap="round"/>']
+    if now is not None and now > 0.02:
+        out.append(f'<path d="{arc(R, A0, ang(now))}" fill="none" stroke="{SWEEP}" stroke-width="14" stroke-linecap="round" opacity="0.30" filter="url(#g)"/>')
+        out.append(f'<path d="{arc(R, A0, ang(now))}" fill="none" stroke="{SWEEP}" stroke-width="5" stroke-linecap="round"/>')
+    for i in range(49):
+        hours = i / 2
+        x, y = pol(R + 18, ang(hours))
+        if i % 2:
+            out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="1.4" fill="{MUTED}" opacity="0.8"/>')
+        else:
+            out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{5 if i % 12 == 0 else 3}" fill="{RED_T if hours >= 22 else TEXT}" opacity="0.92"/>')
+    for hours in (0, 6, 12, 18, 24):
+        x, y = pol(R + 52, ang(hours))
+        out.append(f'<text x="{x:.1f}" y="{y + 5:.1f}" text-anchor="middle" font-family="Zen Dots" font-size="14" '
+                   f'fill="{RED_T if hours == 24 else SILVER}">{hours:02d}</text>')
+    if now is not None:
+        (x0, y0), (x1, y1) = pol(R - 34, ang(now)), pol(R + 8, ang(now))
+        out.append(f'<path d="M{x0:.1f},{y0:.1f} L{x1:.1f},{y1:.1f}" stroke="{TEXT}" stroke-width="4" stroke-linecap="round"/>')
+    return "\n".join(out) + "\n</svg>\n"
+
+
+def render(now, out):
+    out = Path(out)
+    tmp = out.with_name(out.name + ".tmp")
+    subprocess.run(["rsvg-convert", "-o", str(tmp), "/dev/stdin"], input=svg(now).encode(), check=True)
+    tmp.replace(out)
+
+
+def main():
+    a = sys.argv[1:]
+    if a[:1] == ["--static"]:
+        return render(None, a[1])
+    if a[:1] == ["--at"]:
+        h, m = a[1].split(":")
+        return render(int(h) + int(m) / 60, a[2])
+    out = Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp")) / "wangan-lock-arc.png"
+    t = time.localtime()
+    stamp = out.with_suffix(".minute")
+    key = f"yoru {t.tm_yday} {t.tm_hour}:{t.tm_min}"
+    try:
+        fresh = out.exists() and stamp.read_text() == key
+    except OSError:
+        fresh = False
+    if not fresh:
+        render(t.tm_hour + t.tm_min / 60, out)
+        stamp.write_text(key)
+    print(out)
+
+
+if __name__ == "__main__":
+    main()

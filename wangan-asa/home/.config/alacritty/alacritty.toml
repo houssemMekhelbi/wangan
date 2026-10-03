@@ -1,0 +1,79 @@
+# Wangan asa terminal. Night at 95%, compositor blur behind it.
+
+[window]
+opacity = 0.95
+padding = { x = 16, y = 16 }
+decorations = "None"
+blur = true
+
+[font]
+normal = { family = "M PLUS 1 Code", style = "Regular" }
+size = 11
+offset = { x = 0, y = 4 }
+
+[cursor]
+style = { shape = "Block", blinking = "Off" }
+vi_mode_style = { shape = "Block" }
+thickness = 0.2
+
+[colors.primary]
+background = "#E4E8EE"
+foreground = "#2A3240"
+bright_foreground = "#10151D"
+
+[colors.cursor]
+text = "#E4E8EE"
+cursor = "#8F5200"
+
+[colors.selection]
+text = "#10151D"
+background = "#D5DCE7"
+
+# Search, hints, the footer bar and the vi-mode cursor in the theme's colours (alacritty's stock ones otherwise).
+[colors.search.matches]
+foreground = "#E4E8EE"
+background = "#1F4FA8"
+
+[colors.search.focused_match]
+foreground = "#E4E8EE"
+background = "#8F5200"
+
+[colors.hints.start]
+foreground = "#E4E8EE"
+background = "#8F5200"
+
+[colors.hints.end]
+foreground = "#8F5200"
+background = "#D5DCE7"
+
+[colors.footer_bar]
+foreground = "#10151D"
+background = "#D5DCE7"
+
+[colors.line_indicator]
+foreground = "#E4E8EE"
+background = "#1F4FA8"
+
+[colors.vi_mode_cursor]
+text = "#E4E8EE"
+cursor = "#1F4FA8"
+
+[colors.normal]
+black   = "#10151D"
+red     = "#B3161D"
+green   = "#2F6E5A"
+yellow  = "#8F5200"
+blue    = "#1F4FA8"
+magenta = "#5A3FB0"
+cyan    = "#1F6F82"
+white   = "#4E596B"
+
+[colors.bright]
+black   = "#6B7587"
+red     = "#9E1219"
+green   = "#245A49"
+yellow  = "#7A4600"
+blue    = "#17408C"
+magenta = "#4A3296"
+cyan    = "#175C6C"
+white   = "#10151D"

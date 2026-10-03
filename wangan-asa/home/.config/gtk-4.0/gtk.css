@@ -1,0 +1,40 @@
+/* Wangan asa for GTK4 / libadwaita: named colours only, so apps keep their own
+ * layout while picking up the palette. The accent is the bayside blue (a fill,
+ * with white on it); amber stays for attention; destructive and error are the
+ * redline. */
+
+@define-color accent_color            #1F4FA8;
+@define-color accent_bg_color         #2A5FC4;
+@define-color accent_fg_color         #FFFFFF;
+
+@define-color destructive_color       #B3161D;
+@define-color destructive_bg_color    #D41F27;
+@define-color destructive_fg_color    #FFFFFF;
+@define-color success_color           #2F6E5A;
+@define-color success_bg_color        #2F6E5A;
+@define-color warning_color           #8F5200;
+@define-color warning_bg_color        #F2A33A;
+@define-color warning_fg_color        #10151D;
+@define-color error_color             #B3161D;
+@define-color error_bg_color          #D41F27;
+
+@define-color window_bg_color         #E4E8EE;
+@define-color window_fg_color         #10151D;
+@define-color view_bg_color           #F2F4F8;
+@define-color view_fg_color           #10151D;
+@define-color headerbar_bg_color      #F2F4F8;
+@define-color headerbar_fg_color      #10151D;
+@define-color headerbar_border_color  #B7C0CD;
+@define-color headerbar_backdrop_color #E4E8EE;
+@define-color sidebar_bg_color        #E4E8EE;
+@define-color sidebar_fg_color        #10151D;
+@define-color sidebar_border_color    #B7C0CD;
+@define-color secondary_sidebar_bg_color #E4E8EE;
+@define-color card_bg_color           #F2F4F8;
+@define-color card_fg_color           #10151D;
+@define-color dialog_bg_color         #F2F4F8;
+@define-color dialog_fg_color         #10151D;
+@define-color popover_bg_color        #F2F4F8;
+@define-color popover_fg_color        #10151D;
+@define-color thumbnail_bg_color      #D5DCE7;
+@define-color borders                 #B7C0CD;

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Wangan launcher: a floating foot window running fzf over desktop entries.
+# Hyprland gives it the paint-shift border and the glow (see hypr/wangan-asa.lua);
+# foot requests the blur through ext-background-effect.
+# Pressing the bind again while it is open closes it.
+set -euo pipefail
+
+if hyprctl clients -j | grep -q '"class": "wangan-launcher"'; then
+    hyprctl eval 'wangan_close_launcher()' >/dev/null
+    exit 0
+fi
+
+exec foot \
+    --app-id=wangan-launcher \
+    --title=Launcher \
+    -o main.pad=18x14 \
+    -o main.font="M PLUS 1 Code:size=11" \
+    -o main.line-height=22 \
+    -o colors-dark.alpha=0.94 \
+    -o colors-light.alpha=0.94 \
+    "$HOME/.local/bin/wangan-launcher-menu"

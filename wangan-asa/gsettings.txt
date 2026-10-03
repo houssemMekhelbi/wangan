@@ -1,0 +1,8 @@
+# org.gnome.desktop.interface keys applied by restore.sh (captured 2026-09-26)
+gtk-theme='Adwaita'
+icon-theme='WanganAsa'
+color-scheme='prefer-light'
+font-name='M PLUS 1p 10'
+monospace-font-name='M PLUS 1 Code 10'
+cursor-theme='WanganAsaNeedle'
+cursor-size=24

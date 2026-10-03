@@ -1,0 +1,373 @@
+/* Wangan yoru for GTK3, layered on Adwaita (prefer-dark = 1).
+ * Ground and panel surfaces, hairlines, and everything round. Selection: where
+ * there is only text (menus, the current crumb, selected text) it is a
+ * bayside-blue capsule with white text; where there are icons (sidebar, icon
+ * view, list view) it is a raised capsule with the blue crescent under it,
+ * because the folders are blue themselves. Amber only marks attention
+ * (the caret, a focused entry). Menus, popovers and tooltips are rounded
+ * panels. A small round dot separates the path segments
+ * (wangan-yoru/crumb-dot.png from ~/.config/hypr/wangan-yoru/build-art.py).
+ * Thunar-only widgets are targeted through its own style classes
+ * (.path-bar-button, .standard-view, .shortcuts-pane, .statusbar-text); there
+ * is no .thunar class. Opacity comes from Hyprland, so backgrounds are opaque. */
+
+@define-color wangan_ground #0B0D11;
+@define-color wangan_panel  #12161D;
+@define-color wangan_sel    #1A2029;
+@define-color wangan_line   #2A323F;
+@define-color wangan_dim    #5F6A7C;
+@define-color wangan_muted  #8C97A8;
+@define-color wangan_text   #EEF1F5;
+@define-color wangan_blue   #2A5FC4;
+@define-color wangan_bluet  #5B8DEF;
+@define-color wangan_onblue #EEF1F5;
+@define-color wangan_amber  #F2A33A;
+@define-color wangan_red    #FF5A5E;
+
+@define-color theme_bg_color          @wangan_ground;
+@define-color theme_fg_color          @wangan_text;
+@define-color theme_base_color        @wangan_panel;
+@define-color theme_text_color        @wangan_text;
+@define-color theme_selected_bg_color @wangan_blue;
+@define-color theme_selected_fg_color @wangan_onblue;
+@define-color insensitive_fg_color    @wangan_dim;
+@define-color borders                 @wangan_line;
+
+* {
+    font-family: "M PLUS 1p", "IBM Plex Sans Arabic", sans-serif;
+}
+
+/* ---- global: selection and scrollbars ------------------------------ */
+
+selection,
+*:selected,
+*:selected:focus {
+    background-color: @wangan_blue;
+    color: @wangan_onblue;
+}
+
+scrollbar,
+scrollbar trough {
+    background: transparent;
+    border: none;
+}
+
+scrollbar slider {
+    min-width: 4px;
+    min-height: 4px;
+    border: none;
+    border-radius: 4px;
+    background-color: alpha(@wangan_bluet, 0.45);
+}
+
+scrollbar slider:hover {
+    background-color: alpha(@wangan_bluet, 0.85);
+}
+
+tooltip,
+tooltip.background {
+    background-color: @wangan_panel;
+    border: 1px solid @wangan_line;
+    border-radius: 12px;
+    color: @wangan_text;
+}
+
+tooltip * {
+    color: @wangan_text;
+}
+
+/* ---- surfaces ---------------------------------------------------- */
+
+window.background,
+menubar,
+.toolbar,
+toolbar,
+statusbar,
+notebook,
+notebook header,
+paned {
+    background-color: @wangan_panel;
+    background-image: none;
+    color: @wangan_text;
+    box-shadow: none;
+}
+
+.view,
+iconview,
+treeview.view,
+textview text,
+scrolledwindow viewport {
+    background-color: @wangan_panel;
+    color: @wangan_text;
+}
+
+.sidebar,
+.sidebar .view,
+placessidebar,
+placessidebar list {
+    background-color: @wangan_ground;
+    color: @wangan_text;
+}
+
+menubar,
+.toolbar,
+toolbar {
+    border-bottom: 1px solid @wangan_line;
+}
+
+menubar > menuitem {
+    color: @wangan_muted;
+    border-radius: 11px;
+}
+
+menubar > menuitem:hover {
+    background-color: @wangan_sel;
+    color: @wangan_text;
+}
+
+/* Menus are rounded panels; their items are capsules. */
+menu,
+.menu,
+.context-menu {
+    background-color: @wangan_panel;
+    border: 1px solid @wangan_line;
+    border-radius: 14px;
+    box-shadow: none;
+    padding: 6px;
+    margin: 0;
+    color: @wangan_text;
+}
+
+/* a menu's own window must not paint square corners behind the radius */
+.csd.popup,
+window.popup,
+window.menu {
+    background: transparent;
+    border-radius: 14px;
+}
+
+popover,
+popover.background {
+    background-color: @wangan_panel;
+    border: 1px solid @wangan_line;
+    border-radius: 14px;
+    box-shadow: none;
+    color: @wangan_text;
+}
+
+menu menuitem,
+.menu menuitem {
+    border-radius: 11px;
+    padding: 4px 10px;
+}
+
+menu menuitem:hover,
+.menu menuitem:hover {
+    background-color: @wangan_blue;
+    color: @wangan_onblue;
+}
+
+menu menuitem:hover *,
+.menu menuitem:hover * {
+    color: @wangan_onblue;
+}
+
+entry {
+    background-color: @wangan_ground;
+    border: 1px solid @wangan_line;
+    border-radius: 14px;
+    box-shadow: none;
+    padding-left: 12px;
+    padding-right: 12px;
+    color: @wangan_text;
+    caret-color: @wangan_amber;
+}
+
+entry:focus {
+    border-color: @wangan_bluet;
+    box-shadow: inset 0 -2px 0 @wangan_blue;
+}
+
+button {
+    border-radius: 14px;
+}
+
+switch,
+switch slider {
+    border-radius: 14px;
+}
+
+switch:checked {
+    background-color: @wangan_blue;
+}
+
+check:checked,
+radio:checked {
+    background-color: @wangan_blue;
+    color: @wangan_onblue;
+}
+
+progressbar progress,
+scale highlight {
+    background-color: @wangan_amber;
+    border-color: @wangan_amber;
+    border-radius: 4px;
+}
+
+paned > separator {
+    background: @wangan_line;
+    background-image: none;
+    min-width: 1px;
+    min-height: 1px;
+}
+
+headerbar {
+    background: @wangan_panel;
+    border-bottom: 1px solid @wangan_line;
+    box-shadow: none;
+    color: @wangan_text;
+}
+
+/* ---- Thunar ------------------------------------------------------- */
+
+/* Path bar: segments in muted mono with a dot after each; the current segment
+ * is a blue capsule. GTK3 CSS has no generated content, so the dot is an image
+ * in each segment's right padding. */
+.path-bar-button {
+    background-color: transparent;
+    background-image: none;
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 10px 18px;
+    border: none;
+    border-radius: 11px;
+    box-shadow: none;
+    color: @wangan_muted;
+    font-family: "M PLUS 1 Code", monospace;
+    font-size: 12px;
+    padding: 3px 16px 3px 6px;
+    margin: 0;
+    min-height: 0;
+}
+
+.path-bar .path-bar-button {
+    background-image: -gtk-scaled(url("wangan-yoru/crumb-dot.png"));
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 10px 18px;
+}
+
+.path-bar .path-bar-button:checked,
+.path-bar > .path-bar-button:nth-last-child(-n+2) {
+    background-image: none;
+}
+
+.path-bar-button:hover {
+    color: @wangan_text;
+}
+
+.path-bar .path-bar-button:checked {
+    background-color: @wangan_blue;
+    background-image: none;
+    border-radius: 11px;
+    color: @wangan_onblue;
+    font-weight: 500;
+    padding: 3px 12px;
+    margin: 4px 0 4px 4px;
+}
+
+.path-bar-button image {
+    color: @wangan_muted;
+    -gtk-icon-style: symbolic;
+}
+
+.path-bar .path-bar-button:checked image {
+    color: @wangan_onblue;
+}
+
+.toolbar button,
+toolbar button {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 14px;
+    color: @wangan_muted;
+}
+
+.toolbar button:hover,
+toolbar button:hover {
+    background-color: @wangan_sel;
+    color: @wangan_text;
+}
+
+.toolbar button:disabled,
+toolbar button:disabled {
+    color: alpha(@wangan_dim, 0.7);
+}
+
+.shortcuts-pane {
+    border-right: 1px solid @wangan_line;
+}
+
+/* Sidebar: plain 16px icons; the current place is a raised capsule with the crescent. */
+.sidebar .view {
+    padding: 3px 0;
+    font-size: 13px;
+}
+
+.sidebar .view:selected,
+.sidebar .view:selected:focus {
+    background-color: @wangan_sel;
+    color: @wangan_text;
+    border-radius: 12px;
+    box-shadow: inset 0 -2px 0 @wangan_blue;
+}
+
+.sidebar .view.cell:hover {
+    color: @wangan_text;
+}
+
+/* Icon view and list view: the same raised capsule. */
+.standard-view iconview:selected,
+.standard-view iconview:selected:focus,
+.standard-view iconview.view:selected,
+.standard-view iconview.view:selected:focus {
+    background-color: @wangan_sel;
+    background-image: none;
+    color: @wangan_text;
+    outline: none;
+    border-radius: 12px;
+    box-shadow: inset 0 -2px 0 @wangan_blue;
+}
+
+.standard-view treeview.view:selected,
+.standard-view treeview.view:selected:focus {
+    background-color: @wangan_sel;
+    color: @wangan_text;
+    outline: none;
+    box-shadow: inset 0 -2px 0 @wangan_blue;
+}
+
+.standard-view treeview.view header button {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid @wangan_line;
+    border-radius: 0;
+    color: @wangan_amber;
+    font-family: "Zen Dots", sans-serif;
+    font-size: 9px;
+    letter-spacing: 1px;
+}
+
+.split-view-inactive-pane {
+    opacity: 0.8;
+}
+
+/* Status bar: the LCD face in muted. */
+statusbar,
+.statusbar-text {
+    border-top: 1px solid @wangan_line;
+    color: @wangan_muted;
+    font-family: "M PLUS 1 Code", monospace;
+    font-size: 12px;
+}

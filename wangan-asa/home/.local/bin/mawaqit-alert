@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+"""Prayer alert banner (Wangan asa): a lozenge with a five-mark prayer dial on every monitor, above
+fullscreen windows, without taking keyboard focus. Click to dismiss.
+
+    mawaqit-alert '<json>'
+      kind      "adhan" | "iqama"
+      en, ar    prayer name ("Asr", "العصر")
+      time      "17:00"          mosque  "Paris"
+      iqama     "17:10" | null   iqama_ts  epoch of the iqama | null
+      duration  seconds on screen
+Sound: ~/.local/share/mawaqit/sounds/<kind>.wav; MAWAQIT_CHIME=<file> overrides,
+MAWAQIT_CHIME= (empty) silences. Rings again after MAWAQIT_REPEAT seconds (60)
+unless dismissed.
+
+Launched by `waybar-mawaqit watch` (mawaqit-alerts.service). Namespace
+hattin-mawaqit, so hypr/wangan-asa.lua's ^hattin- layer rule blurs behind it.
+Everything is drawn here with cairo; there are no image files.
+"""
+
+import json
+import math
+import os
+import subprocess
+import sys
+import time
+
+LIB = "/usr/lib/libgtk4-layer-shell.so"
+if LIB not in os.environ.get("LD_PRELOAD", ""):  # must load before libwayland
+    os.environ["LD_PRELOAD"] = f"{LIB} {os.environ.get('LD_PRELOAD', '')}".strip()
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
+import gi  # noqa: E402
+gi.require_version("Gtk", "4.0")
+gi.require_version("Gdk", "4.0")
+gi.require_version("Gtk4LayerShell", "1.0")
+gi.require_version("Pango", "1.0")
+gi.require_version("PangoCairo", "1.0")
+from gi.repository import Gdk, GLib, Gtk, Gtk4LayerShell as LS, Pango, PangoCairo  # noqa: E402
+import cairo  # noqa: E402
+
+SOUNDS = os.path.expanduser("~/.local/share/mawaqit/sounds")  # adhan.wav, iqama.wav (make.py)
+FALLBACK = "/usr/share/sounds/freedesktop/stereo/complete.oga"
+REPEAT = int(os.environ.get("MAWAQIT_REPEAT", "60"))  # seconds until the reminder ring
+
+
+def chime(kind):
+    """MAWAQIT_CHIME overrides (empty = silent); else the bell for this kind."""
+    if "MAWAQIT_CHIME" in os.environ:
+        return os.environ["MAWAQIT_CHIME"]
+    path = os.path.join(SOUNDS, f"{kind}.wav")
+    return path if os.path.exists(path) else FALLBACK
+M = 18                                   # room around the lozenge for its shadow
+W, H = 540, 150                          # the lozenge; wide enough for "city · time · iqama time · in 12m 30s" at 16px
+RADIUS = 40
+PRAYER_INDEX = {"fajr": 0, "shuruq": 0, "dhuhr": 1, "jumua": 1, "asr": 2, "maghrib": 3, "isha": 4}
+NEEDLE = {"index": 2}                    # set from the alert before drawing
+
+
+def rgb(h):
+    return tuple(int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+
+
+PANEL, LINE, BLUE = rgb("F2F4F8"), rgb("B7C0CD"), rgb("2A5FC4")
+AMBER, TEXT, MUTED = rgb("F2A33A"), rgb("10151D"), rgb("4E596B")
+
+CSS = b"""
+window { background: transparent; }
+.card { padding: 30px 34px 12px 132px; }
+.name { font-family: "Zen Dots", sans-serif; font-size: 27px; color: #10151D; }
+.ar   { font-family: "Changa", "IBM Plex Sans Arabic", sans-serif; font-weight: 700; font-size: 26px; color: #8F5200; }
+.tag  { font-family: "Zen Dots", sans-serif; font-size: 9px; letter-spacing: 1px; color: #8F5200;
+        border: 1px solid #8F5200; border-radius: 10px; padding: 2px 10px; }
+.tag.iqama { background: #F2A33A; border-color: #F2A33A; color: #10151D; }
+.sub  { font-family: "DotGothic16", "M PLUS 1 Code", monospace; font-size: 16px; color: #4E596B; }
+.hint { font-family: "Zen Dots", sans-serif; font-size: 8px; letter-spacing: 1px; color: #4E596B; }
+"""
+
+
+def lozenge(cr, x, y, w, h, r):
+    cr.new_sub_path()
+    cr.arc(x + w - r, y + r, r, -math.pi / 2, 0)
+    cr.arc(x + w - r, y + h - r, r, 0, math.pi / 2)
+    cr.arc(x + r, y + h - r, r, math.pi / 2, math.pi)
+    cr.arc(x + r, y + r, r, math.pi, 3 * math.pi / 2)
+    cr.close_path()
+
+
+def draw(iqama):
+    """The lozenge with the blue crescent along its lower edge, and the prayer dial:
+    five round marks on a 240 degree arc, the needle on the current prayer. For the
+    iqama an amber arc fills the dial up to the needle."""
+    def fn(_area, cr, w, h):
+        for i in range(10, 0, -1):  # a soft shadow; stays under the blur rule's ignore_alpha
+            lozenge(cr, M - i, M + 3 - i, W + 2 * i, H + 2 * i, RADIUS + i)
+            cr.set_source_rgba(0, 0, 0, 0.012)
+            cr.fill()
+        lozenge(cr, M, M, W, H, RADIUS)
+        cr.set_source_rgba(*PANEL, 1.0)
+        cr.fill()
+        # the crescent: the lower edge of the outline, in blue
+        cr.save()
+        cr.rectangle(M, M + H - RADIUS * 0.75, W, RADIUS)
+        cr.clip()
+        lozenge(cr, M + 1, M + 1, W - 2, H - 2, RADIUS - 1)
+        cr.set_source_rgb(*BLUE)
+        cr.set_line_width(2)
+        cr.stroke()
+        cr.restore()
+        lozenge(cr, M + 0.5, M + 0.5, W - 1, H - 1, RADIUS - 0.5)
+        cr.set_source_rgb(*LINE)
+        cr.set_line_width(1)
+        cr.stroke()
+
+        cx, cy, r = M + 76, M + H / 2 + 4, 44
+        a0, a1 = math.radians(150), math.radians(390)
+        cr.set_line_cap(cairo.LINE_CAP_ROUND)
+        cr.arc(cx, cy, r, a0, a1)
+        cr.set_source_rgb(*BLUE)
+        cr.set_line_width(2.4)
+        cr.stroke()
+        marks = [a0 + (a1 - a0) * i / 4 for i in range(5)]
+        idx = NEEDLE["index"]
+        for i in range(25):
+            if i % 6:
+                a = a0 + (a1 - a0) * i / 24
+                cr.arc(cx + (r - 7) * math.cos(a), cy + (r - 7) * math.sin(a), 1.0, 0, 2 * math.pi)
+                cr.set_source_rgb(*MUTED)
+                cr.fill()
+        if iqama:
+            cr.arc(cx, cy, r - 19, a0, marks[idx])
+            cr.set_source_rgba(*AMBER, 0.9)
+            cr.set_line_width(3.4)
+            cr.stroke()
+        for i, a in enumerate(marks):
+            cr.arc(cx + (r - 8) * math.cos(a), cy + (r - 8) * math.sin(a), 4.2 if i == idx else 2.8, 0, 2 * math.pi)
+            cr.set_source_rgb(*(AMBER if i == idx else TEXT))
+            cr.fill()
+        a = marks[idx]
+        cr.move_to(cx - 8 * math.cos(a), cy - 8 * math.sin(a))
+        cr.line_to(cx + (r - 17) * math.cos(a), cy + (r - 17) * math.sin(a))
+        cr.set_source_rgb(*AMBER)
+        cr.set_line_width(2.8)
+        cr.stroke()
+        cr.arc(cx, cy, 5, 0, 2 * math.pi)
+        cr.set_source_rgb(*PANEL)
+        cr.fill_preserve()
+        cr.set_source_rgb(*TEXT)
+        cr.set_line_width(1.8)
+        cr.stroke()
+    return fn
+
+
+def until(ts):
+    s = max(0, int(ts - time.time()))
+    m, s = divmod(s, 60)
+    return f"in {m}m {s:02d}s" if m else f"in {s}s"
+
+
+def build(app, a, monitor):
+    win = Gtk.ApplicationWindow(application=app)
+    LS.init_for_window(win)
+    LS.set_namespace(win, "hattin-mawaqit")
+    LS.set_layer(win, LS.Layer.OVERLAY)
+    LS.set_anchor(win, LS.Edge.TOP, True)
+    LS.set_margin(win, LS.Edge.TOP, 14 - M // 2)
+    LS.set_keyboard_mode(win, LS.KeyboardMode.NONE)
+    LS.set_monitor(win, monitor)
+    win.set_default_size(W + 2 * M, H + 2 * M)
+
+    iqama = a["kind"] == "iqama"
+    NEEDLE["index"] = PRAYER_INDEX.get("".join(c for c in a["en"].lower() if c.isascii() and c.isalpha()), 2)
+    area = Gtk.DrawingArea()
+    area.set_content_width(W + 2 * M)
+    area.set_content_height(H + 2 * M)
+    area.set_draw_func(draw(iqama))
+
+    name = Gtk.Label(label=a["en"], xalign=0)
+    name.add_css_class("name")
+    ar = Gtk.Label(label=a["ar"], xalign=0, hexpand=True)
+    ar.add_css_class("ar")
+    tag = Gtk.Label(label="IQAMA" if iqama else "ADHAN", xalign=1, valign=Gtk.Align.START)
+    tag.add_css_class("tag")
+    if iqama:
+        tag.add_css_class("iqama")
+    title = Gtk.Box(spacing=12)
+    title.append(name)
+    title.append(ar)
+    title.append(tag)
+
+    sub = Gtk.Label(xalign=0)
+    sub.add_css_class("sub")
+
+    minutes = max(1, round(int(a.get("duration", 240)) / 60))
+    hint = Gtk.Label(label=f"{minutes} MIN" if iqama else "DISMISS", xalign=1)
+    hint.add_css_class("hint")
+
+    def tick():
+        head = f"{a['mosque']} · {a['time']}"
+        if iqama:
+            sub.set_label(f"{a['mosque']} · {a.get('iqama') or a['time']} · the prayer is starting")
+        elif a.get("iqama_ts") and a["iqama_ts"] > time.time():
+            sub.set_label(f"{head} · iqama {a['iqama']} · {until(a['iqama_ts'])}")
+        elif a.get("iqama"):
+            sub.set_label(f"{head} · iqama {a['iqama']} · now")
+        else:
+            sub.set_label(f"{head} · time for prayer")
+        return True
+    tick()
+    GLib.timeout_add_seconds(1, tick)
+
+    card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2, valign=Gtk.Align.START)
+    card.add_css_class("card")
+    card.set_margin_top(M)
+    card.set_margin_start(M)
+    card.set_margin_end(M)
+    for w in (title, sub, hint):
+        card.append(w)
+
+    over = Gtk.Overlay()
+    over.set_child(area)
+    over.add_overlay(card)
+    win.set_child(over)
+
+    click = Gtk.GestureClick()
+    click.connect("pressed", lambda *_: app.quit())
+    win.add_controller(click)
+    win.present()
+
+
+def main():
+    a = json.loads(sys.argv[1])
+    app = Gtk.Application(application_id=None)
+
+    def activate(app):
+        prov = Gtk.CssProvider()
+        prov.load_from_data(CSS)
+        disp = Gdk.Display.get_default()
+        Gtk.StyleContext.add_provider_for_display(disp, prov, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        mons = disp.get_monitors()
+        for i in range(mons.get_n_items()):
+            build(app, a, mons.get_item(i))
+        app.hold()
+        GLib.timeout_add_seconds(max(30, int(a.get("duration", 300))), app.quit)
+        sound = chime(a["kind"])
+        if sound and os.path.exists(sound):
+            def ring():
+                subprocess.Popen(["pw-play", "--media-role", "Notification", sound],
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return False
+            ring()
+            # one reminder if the banner is still up; dismissing quits first
+            GLib.timeout_add_seconds(REPEAT, ring)
+
+    app.connect("activate", activate)
+    app.run([])
+
+
+if __name__ == "__main__":
+    main()

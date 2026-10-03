@@ -1,0 +1,250 @@
+/* Wangan asa bar. Blue is the body, amber is the instruments, red is the redline
+ * only; every shape is round. Three capsules (left, centre, right) with a blue
+ * crescent along the lower edge; inside them every module is its own round LCD
+ * window. Workspaces are gear knobs on a neutral rail, odd gears above it and
+ * even gears below, drawn as one image per slot and state (wangan-asa/ws.css and
+ * the PNGs come from ~/.config/hypr/wangan-asa/build-art.py). Labels are Zen Dots
+ * in amber (markup in config.jsonc), values DotGothic16 at its native 16px. */
+
+@import url("wangan-asa/ws.css");
+
+@define-color ground #E4E8EE;
+@define-color panel  #F2F4F8;
+@define-color lcd    #DDE3EB;
+@define-color sel    #D5DCE7;
+@define-color line   #B7C0CD;
+@define-color ring   #A9B3C2;
+@define-color muted  #4E596B;
+@define-color silver #2A3240;
+@define-color text   #10151D;
+@define-color blue   #2A5FC4;
+@define-color bluet  #1F4FA8;
+@define-color amber  #F2A33A;
+@define-color ambert #8F5200;
+@define-color red    #D41F27;
+@define-color redt   #B3161D;
+
+* {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    min-height: 0;
+    font-family: "M PLUS 1p", "IBM Plex Sans Arabic", "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+}
+
+window#waybar {
+    background: transparent;
+    color: @text;
+}
+
+tooltip {
+    background: alpha(@panel, 0.97);
+    border: 1px solid @line;
+    border-radius: 14px;
+}
+
+tooltip label {
+    padding: 4px 6px;
+    color: @text;
+    font-family: "M PLUS 1 Code", "JetBrainsMono Nerd Font", monospace;
+    font-size: 12px;
+}
+
+/* ---- the capsules ------------------------------------------------------ */
+/* 40px capsules in a 46px bar. The inset shadow follows the radius, so the
+ * 2px of blue at the bottom turn into a crescent at both ends. */
+
+.modules-left,
+.modules-center,
+.modules-right {
+    margin: 3px 0;
+    padding: 0 4px;
+    border: 1px solid @line;
+    border-radius: 20px;
+    background: alpha(@panel, 0.92);
+    box-shadow: inset 0 -2px 0 @blue;
+}
+
+.modules-center {
+    padding: 0 10px;
+}
+
+window#waybar.empty #window {
+    padding: 0;
+}
+
+/* ---- workspaces: the gear gate ------------------------------------------- */
+/* hattin-workspaces prints a glyph per slot; here the glyph is hidden and
+ * wangan-asa/ws.css gives every slot its knob for the state: muted empty, text on
+ * a raised knob with a blue ring when occupied, a lit outline when active on
+ * another monitor, amber with a glow when focused, red when urgent. The gate
+ * is one LCD window; the foreign slot stays text: one R per workspace. */
+
+#workspaces {
+    margin: 1px 3px 1px 0;
+    padding: 0 7px;
+    border-radius: 18px;
+    background: @lcd;
+    box-shadow: inset 0 0 0 1px @line;
+}
+
+#custom-ws-1, #custom-ws-2, #custom-ws-3, #custom-ws-4, #custom-ws-5,
+#custom-ws-6, #custom-ws-7, #custom-ws-8, #custom-ws-9, #custom-ws-10 {
+    min-width: 26px;
+    padding: 0;
+    margin: 0;
+    color: transparent;
+    font-size: 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 26px 36px;
+}
+
+#custom-ws-x {
+    min-width: 0;
+    padding: 0 4px 0 8px;
+    color: @bluet;
+    font-family: "Zen Dots", "M PLUS 1p", sans-serif;
+    font-size: 9px;
+}
+
+#custom-ws-x.active {
+    color: @ambert;
+}
+
+#custom-ws-1:hover, #custom-ws-2:hover, #custom-ws-3:hover, #custom-ws-4:hover,
+#custom-ws-5:hover, #custom-ws-6:hover, #custom-ws-7:hover, #custom-ws-8:hover,
+#custom-ws-9:hover, #custom-ws-10:hover {
+    background-color: alpha(@blue, 0.18);
+    border-radius: 13px;
+}
+
+/* ---- LCD windows ----------------------------------------------------------- */
+/* Every module is a round window into the instrument: the LCD ground, a
+ * hairline ring, values in DotGothic16 at the size it was drawn for. */
+
+#custom-mawaqit,
+#custom-proton,
+#custom-tailscale,
+#network,
+#wireplumber,
+#bluetooth,
+#cpu,
+#memory,
+#temperature,
+#custom-nvidia,
+#power-profiles-daemon,
+#battery,
+#custom-tray-leader,
+#custom-notifications,
+#custom-idle,
+#custom-yawm {
+    margin: 6px 3px;
+    padding: 0 11px;
+    border-radius: 13px;
+    background: @lcd;
+    box-shadow: inset 0 0 0 1px @line;
+    color: @text;
+    font-family: "DotGothic16", "M PLUS 1 Code", "JetBrainsMono Nerd Font", monospace;
+    font-size: 16px;
+}
+
+/* next prayer: city as an amber label, prayer muted, time in text colour
+ * (markup from waybar-mawaqit); classes: soon (<15m), iqama, error, unset. */
+#custom-mawaqit.error,
+#custom-mawaqit.unset {
+    color: @muted;
+}
+
+#window {
+    padding: 0 14px 0 8px;
+    color: @silver;
+    font-size: 13px;
+}
+
+#clock {
+    padding: 0 12px;
+    color: @text;
+    font-family: "DotGothic16", "M PLUS 1 Code", monospace;
+    font-size: 16px;
+}
+
+#power-profiles-daemon {
+    color: @muted;
+}
+
+#custom-proton.up,
+#custom-tailscale.up,
+#custom-nvidia.active {
+    color: @bluet;
+}
+
+#custom-proton.down,
+#custom-tailscale.down {
+    color: @redt;
+}
+
+/* due today: an amber ring and count; overdue: the redline */
+#custom-yawm.due {
+    color: @ambert;
+    box-shadow: inset 0 0 0 1px @ambert;
+}
+
+#custom-yawm.overdue {
+    color: @redt;
+    box-shadow: inset 0 0 0 1px @red;
+}
+
+#custom-idle.off,
+#battery.warning,
+#temperature.critical {
+    color: @ambert;
+    box-shadow: inset 0 0 0 1px @ambert;
+}
+
+#battery.critical {
+    color: #FFFFFF;
+    background: @red;
+    box-shadow: none;
+}
+
+/* ---- click-to-reveal groups (NET, SYS, •••) ---------------------------------- */
+
+#custom-tray-leader {
+    color: @muted;
+    font-family: "DejaVu Sans Mono", monospace;
+    font-size: 11px;
+}
+
+#tray {
+    margin: 6px 3px;
+    padding: 0 8px;
+}
+
+#network:hover,
+#cpu:hover,
+#custom-tray-leader:hover,
+#custom-mawaqit:hover,
+#custom-notifications:hover,
+#custom-idle:hover,
+#custom-yawm:hover {
+    box-shadow: inset 0 0 0 1px @bluet;
+}
+
+#tray menu {
+    background: @panel;
+    border: 1px solid @line;
+    border-radius: 12px;
+    color: @text;
+}
+
+#tray menu menuitem {
+    border-radius: 9px;
+}
+
+#tray menu menuitem:hover {
+    background: @blue;
+    color: #FFFFFF;
+}
