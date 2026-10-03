@@ -311,6 +311,7 @@
     "on-click-right": "~/.local/bin/wangan-yawm add"
   },
   "clock": {
+    "locale": "en_GB.UTF-8",
     "format": "<span color='#4E596B'>{0:%a %d %b}</span>  <span color='#8F5200'>•</span>  <span font_family='Zen Dots' size='small'>{0:%H:%M}</span>",
     "tooltip-format": "<tt>{calendar}</tt>",
     "calendar": {

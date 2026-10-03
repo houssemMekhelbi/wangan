@@ -15,7 +15,7 @@
 
 setopt prompt_subst
 
-WANGAN_DEFAULT_USER=${WANGAN_DEFAULT_USER:-rahal}   # hide context on your own box
+WANGAN_DEFAULT_USER=${WANGAN_DEFAULT_USER:-$USER}   # hide context on your own box
 
 W_SEL='#1A2029'  W_BLUE='#2A5FC4'  W_ONBLUE='#EEF1F5' W_AMBER='#F2A33A' W_ONAMBER='#0B0D11'
 W_TEXT='#EEF1F5' W_RED='#D41F27'   W_ONRED='#FFFFFF'   W_AMBER_T='#F2A33A' W_DIM='#5F6A7C'
